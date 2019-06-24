@@ -22,6 +22,7 @@ colors = loadmat('data/color150.mat')['colors']
 
 def visualize_result(data, pred, args):
     (img, info) = data
+    print(info)
 
     # prediction
     pred_color = colorEncode(pred, colors).astype(np.uint8)
@@ -47,14 +48,14 @@ def test(segmentation_module, loader, args):
 
         with torch.no_grad():
             scores = torch.zeros(1, args.num_class, segSize[0], segSize[1])
-            scores = async_copy_to(scores, args.gpu)
+            #scores = async_copy_to(scores, args.gpu)
 
             for img in img_resized_list:
                 feed_dict = batch_data.copy()
                 feed_dict['img_data'] = img
                 del feed_dict['img_ori']
                 del feed_dict['info']
-                feed_dict = async_copy_to(feed_dict, args.gpu)
+                #feed_dict = async_copy_to(feed_dict, args.gpu)
 
                 # forward pass
                 pred_tmp = segmentation_module(feed_dict, segSize=segSize)
@@ -67,12 +68,13 @@ def test(segmentation_module, loader, args):
         visualize_result(
             (batch_data['img_ori'], batch_data['info']),
             pred, args)
+        print(batch_data['info'])
 
         pbar.update(1)
 
 
 def main(args):
-    torch.cuda.set_device(args.gpu)
+    #torch.cuda.set_device(args.gpu)
 
     # Network Builders
     builder = ModelBuilder()
@@ -107,7 +109,7 @@ def main(args):
         num_workers=5,
         drop_last=True)
 
-    segmentation_module.cuda()
+    #segmentation_module.cuda()
 
     # Main loop
     test(segmentation_module, loader_test, args)
